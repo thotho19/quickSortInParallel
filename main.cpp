@@ -2,6 +2,7 @@
 #include<iostream>
 #include<vector>
 #include<fstream>
+#include<chrono>
 using namespace std;
 
 void asciiToVector(vector<int> &arr)
@@ -42,7 +43,7 @@ void quickSort(vector<int>& arr, int low, int high)
     { 
         
         int pi = partition(arr, low, high); 
-        
+       
         thread t1([&]{
             quickSort(arr, low, pi-1);
         });
@@ -61,11 +62,38 @@ void printToFile(vector<int>& arr){
         myFile<<arr[i]<<" ";
     myFile.close();
 }
+class timer
+{
+public:
+    timer(){
+        startTimePoint = std::chrono::high_resolution_clock::now();
+    }
+    ~timer()
+    {
+        stop();
+    }
+    void stop()
+    {
+        auto endTimePoint = std::chrono::high_resolution_clock::now();
+
+        auto start = std::chrono::time_point_cast<std::chrono::microseconds>(startTimePoint).time_since_epoch().count();
+        auto end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count();
+
+        auto duration = end  - start;
+        double ms = duration * 0.001;
+        cout<<duration<<"us ("<< ms <<"ms)\n";
+    }
+private:
+    std::chrono::time_point< std::chrono::high_resolution_clock>startTimePoint;
+};
 int main() 
 { 
     vector<int> arr;
     asciiToVector(std::ref(arr));
-    quickSort(arr, 0, arr.size()-1); 
+    {
+        timer timer;
+        quickSort(arr, 0, arr.size()-1); 
+    }
     printToFile(arr);
     return 0; 
 } 
